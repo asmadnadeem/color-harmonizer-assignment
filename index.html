@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Harmonize — Pastel Brown Minimal</title>
     <style>
-        /* ultra-minimal newbie CSS */
         
         * {
             box-sizing: border-box
@@ -116,7 +115,6 @@
             } else {
                 h = 0;
             }
-            // normalize hue to 0..359
             h = ((h % 360) + 360) % 360;
             return [h, Math.round(s * 100), Math.round(l * 100)];
         }
