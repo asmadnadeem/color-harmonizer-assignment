@@ -1,208 +1,215 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Harmonize — Pastel Brown Minimal</title>
-<style>
-  :root{
-    --bg:#f8f4ef;
-    --card:#fffdf9;
-    --text:#3a2b23;
-    --accent:#d7b99a;
-    --border:#e4d6c6;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family:system-ui,Arial,Helvetica,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:18px;
-    padding:20px;
-  }
-  h2{margin-bottom:6px;font-weight:600}
-  .controls{
-    background:var(--card);
-    padding:12px 16px;
-    border-radius:12px;
-    border:1px solid var(--border);
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  input{
-    padding:8px 10px;
-    border-radius:8px;
-    border:1px solid var(--border);
-    background:#fff;
-    font-family:monospace;
-  }
-  button{
-    padding:8px 12px;
-    border:none;
-    border-radius:8px;
-    background:var(--accent);
-    color:#3b2a1f;
-    cursor:pointer;
-  }
-  .colors{
-    display:flex;
-    gap:16px;
-    flex-wrap:wrap;
-    justify-content:center;
-  }
-  .swatch-wrap{width:120px;text-align:center}
-  .display{
-    width:120px;height:120px;border-radius:12px;border:1px solid var(--border);
-    box-shadow:0 2px 6px rgba(0,0,0,0.04);
-    background:transparent;
-  }
-  .label{margin-top:8px;font-size:13px}
-  .hex{font-family:monospace;font-size:12px;color:#5b4a3d}
-</style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Harmonize — Pastel Brown Minimal</title>
+    <style>
+        /* ultra-minimal newbie CSS */
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            font-family: system-ui, Arial, Helvetica, sans-serif;
+            margin: 20px;
+        }
+        
+        .display {
+            width: 120px;
+            height: 120px
+        }
+        
+        input,
+        button {
+            font-family: monospace
+        }
+        
+        .colors {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px
+        }
+        
+        .swatch-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px
+        }
+        
+        .label {
+            font-size: 0.9rem
+        }
+        
+        .hex {
+            font-family: monospace;
+            font-size: 0.85rem
+        }
+    </style>
 </head>
+
 <body>
 
-  <h2>Color Harmonizer</h2>
+    <h2>Color Harmonizer</h2>
 
-  <div class="controls">
-    <input id="colorInput" maxlength="7" value="#d4a373" />
-    <button id="applyBtn">Apply</button>
-    <button id="randomBtn">Random</button>
-  </div>
-
-  <div class="colors">
-    <div class="swatch-wrap">
-      <div id="baseDisplay" class="display"></div>
-      <div class="label">Base</div>
-      <div id="baseHex" class="hex"></div>
+    <div class="controls">
+        <input id="colorInput" maxlength="7" value="#d4a373" />
+        <button id="applyBtn">Apply</button>
     </div>
 
-    <div class="swatch-wrap">
-      <div id="complementaryDisplay" class="display"></div>
-      <div class="label">Complement</div>
-      <div id="compHex" class="hex"></div>
+    <div class="colors">
+        <div class="swatch-wrap">
+            <div id="baseDisplay" class="display"></div>
+            <div class="label">Base</div>
+            <div id="baseHex" class="hex"></div>
+        </div>
+
+        <div class="swatch-wrap">
+            <div id="complementaryDisplay" class="display"></div>
+            <div class="label">Complement</div>
+            <div id="compHex" class="hex"></div>
+        </div>
+
+        <div class="swatch-wrap">
+            <div id="triadic1Display" class="display"></div>
+            <div class="label">Triad 1</div>
+            <div id="t1Hex" class="hex"></div>
+        </div>
+
+        <div class="swatch-wrap">
+            <div id="triadic2Display" class="display"></div>
+            <div class="label">Triad 2</div>
+            <div id="t2Hex" class="hex"></div>
+        </div>
     </div>
 
-    <div class="swatch-wrap">
-      <div id="triadic1Display" class="display"></div>
-      <div class="label">Triad 1</div>
-      <div id="t1Hex" class="hex"></div>
-    </div>
+    <script>
+        function hexToHsl(hex) {
+            if (/^#?[0-9a-fA-F]{6}$/.test(hex) === false) throw new Error('invalid hex');
+            if (hex[0] !== '#') hex = '#' + hex;
+            const r = parseInt(hex.slice(1, 3), 16) / 255;
+            const g = parseInt(hex.slice(3, 5), 16) / 255;
+            const b = parseInt(hex.slice(5, 7), 16) / 255;
+            const max = Math.max(r, g, b),
+                min = Math.min(r, g, b);
+            let h = 0,
+                s = 0,
+                l = (max + min) / 2;
+            if (max !== min) {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r:
+                        h = (g - b) / d + (g < b ? 6 : 0);
+                        break;
+                    case g:
+                        h = (b - r) / d + 2;
+                        break;
+                    case b:
+                        h = (r - g) / d + 4;
+                        break;
+                }
+                h = Math.round(h * 60);
+            } else {
+                h = 0;
+            }
+            // normalize hue to 0..359
+            h = ((h % 360) + 360) % 360;
+            return [h, Math.round(s * 100), Math.round(l * 100)];
+        }
 
-    <div class="swatch-wrap">
-      <div id="triadic2Display" class="display"></div>
-      <div class="label">Triad 2</div>
-      <div id="t2Hex" class="hex"></div>
-    </div>
-  </div>
+        function calculateHarmonies([H, S, L]) {
+            const wrap = x => ((x % 360) + 360) % 360;
+            return {
+                complementary: [wrap(H + 180), S, L],
+                triadic1: [wrap(H + 120), S, L],
+                triadic2: [wrap(H + 240), S, L]
+            };
+        }
 
-<script>
-function hexToHsl(hex){
-  if(/^#?[0-9a-fA-F]{6}$/.test(hex)===false) throw new Error('invalid hex');
-  if(hex[0]!=='#') hex='#'+hex;
-  const r = parseInt(hex.slice(1,3),16)/255;
-  const g = parseInt(hex.slice(3,5),16)/255;
-  const b = parseInt(hex.slice(5,7),16)/255;
-  const max = Math.max(r,g,b), min = Math.min(r,g,b);
-  let h=0, s=0, l=(max+min)/2;
-  if(max!==min){
-    const d = max-min;
-    s = l > 0.5 ? d/(2-max-min) : d/(max+min);
-    switch(max){
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
-    }
-    h = Math.round(h * 60);
-  } else {
-    h = 0;
-  }
-  return [h, Math.round(s*100), Math.round(l*100)];
-}
+        function hslToCss([H, S, L]) {
+            return `hsl(${H}, ${S}%, ${L}%)`;
+        }
 
-function calculateHarmonies([H,S,L]){
-  const wrap = x => ((x % 360) + 360) % 360;
-  return {
-    complementary: [wrap(H + 180), S, L],
-    triadic1:      [wrap(H + 120), S, L],
-    triadic2:      [wrap(H + 240), S, L]
-  };
-}
+        function hslToRgb(h, s, l) {
+            h = h / 360;
+            s = s / 100;
+            l = l / 100;
+            if (s === 0) {
+                const v = Math.round(l * 255);
+                return [v, v, v];
+            }
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            const hue2rgb = (p, q, t) => {
+                if (t < 0) t += 1;
+                if (t > 1) t -= 1;
+                if (t < 1 / 6) return p + (q - p) * 6 * t;
+                if (t < 1 / 2) return q;
+                if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+                return p;
+            };
+            const r = Math.round(hue2rgb(p, q, h + 1 / 3) * 255);
+            const g = Math.round(hue2rgb(p, q, h) * 255);
+            const b = Math.round(hue2rgb(p, q, h - 1 / 3) * 255);
+            return [r, g, b];
+        }
 
-function hslToCss([H,S,L]){
-  return `hsl(${H}, ${S}%, ${L}%)`;
-}
+        function rgbToHex(r, g, b) {
+            const toHex = n => n.toString(16).padStart(2, '0');
+            return '#' + toHex(r) + toHex(g) + toHex(b);
+        }
 
-function hslToRgb(h, s, l){
-  h = h / 360;
-  s = s / 100;
-  l = l / 100;
-  if(s === 0){
-    const v = Math.round(l * 255);
-    return [v, v, v];
-  }
-  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-  const p = 2 * l - q;
-  const hue2rgb = (p, q, t) => {
-    if(t < 0) t += 1;
-    if(t > 1) t -= 1;
-    if(t < 1/6) return p + (q - p) * 6 * t;
-    if(t < 1/2) return q;
-    if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-    return p;
-  };
-  const r = Math.round(hue2rgb(p, q, h + 1/3) * 255);
-  const g = Math.round(hue2rgb(p, q, h) * 255);
-  const b = Math.round(hue2rgb(p, q, h - 1/3) * 255);
-  return [r,g,b];
-}
+        function updateColors() {
+            const inEl = document.getElementById('colorInput');
+            let v = (inEl && inEl.value || '').trim();
+            if (!/^#?[0-9a-fA-F]{6}$/.test(v)) return;
+            if (v[0] !== '#') v = '#' + v;
 
-function rgbToHex(r,g,b){
-  const toHex = n => n.toString(16).padStart(2,'0');
-  return '#' + toHex(r) + toHex(g) + toHex(b);
-}
+            const baseHsl = hexToHsl(v);
+            const harmonies = calculateHarmonies(baseHsl);
 
-function updateColors(){
-  const inEl = document.getElementById('colorInput');
-  let v = (inEl && inEl.value || '').trim();
-  if(!/^#?[0-9a-fA-F]{6}$/.test(v)) return;
-  if(v[0] !== '#') v = '#'+v;
+            const sets = [{
+                sw: 'baseDisplay',
+                hexEl: 'baseHex',
+                hsl: baseHsl
+            }, {
+                sw: 'complementaryDisplay',
+                hexEl: 'compHex',
+                hsl: harmonies.complementary
+            }, {
+                sw: 'triadic1Display',
+                hexEl: 't1Hex',
+                hsl: harmonies.triadic1
+            }, {
+                sw: 'triadic2Display',
+                hexEl: 't2Hex',
+                hsl: harmonies.triadic2
+            }];
 
-  const baseHsl = hexToHsl(v);
-  const harmonies = calculateHarmonies(baseHsl);
+            sets.forEach(s => {
+                const sw = document.getElementById(s.sw);
+                const hexOut = document.getElementById(s.hexEl);
+                if (!sw || !hexOut) return;
+                sw.style.backgroundColor = hslToCss(s.hsl);
+                const [r, g, b] = hslToRgb(...s.hsl);
+                hexOut.textContent = rgbToHex(r, g, b);
+            });
+        }
 
-  const sets = [
-    { sw: 'baseDisplay', hexEl: 'baseHex', hsl: baseHsl },
-    { sw: 'complementaryDisplay', hexEl: 'compHex', hsl: harmonies.complementary },
-    { sw: 'triadic1Display', hexEl: 't1Hex', hsl: harmonies.triadic1 },
-    { sw: 'triadic2Display', hexEl: 't2Hex', hsl: harmonies.triadic2 }
-  ];
+        function init() {
+            const applyBtn = document.getElementById('applyBtn');
+            const colorInput = document.getElementById('colorInput');
+            applyBtn.addEventListener('click', updateColors);
+            colorInput.addEventListener('input', updateColors);
+            updateColors();
+        }
 
-  sets.forEach(s=>{
-    const sw = document.getElementById(s.sw);
-    const hexOut = document.getElementById(s.hexEl);
-    if(!sw || !hexOut) return;
-    sw.style.background = hslToCss(s.hsl);
-    const [r,g,b] = hslToRgb(...s.hsl);
-    hexOut.textContent = rgbToHex(r,g,b);
-  });
-}
-
-document.getElementById('applyBtn').addEventListener('click', updateColors);
-document.getElementById('colorInput').addEventListener('input', updateColors);
-document.getElementById('randomBtn').addEventListener('click', ()=>{
-  const rnd = '#'+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0');
-  document.getElementById('colorInput').value = rnd;
-  updateColors();
-});
-
-updateColors();
-</script>
+        init();
+    </script>
 </body>
+
 </html>
